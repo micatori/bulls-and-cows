@@ -16,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/micatori/bulls-and-cows/issues"
   },
-  "homepage": "https://github.com/micatori/bulls-and-cows#readme"
+  "homepage": "https://github.com/micatori/bulls-and-cows#readme",
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2"
+  }
 }
