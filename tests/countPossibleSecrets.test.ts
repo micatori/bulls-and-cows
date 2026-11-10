@@ -75,6 +75,12 @@ describe('countPossibleSecrets over the game domain', () => {
     expect(countPossibleSecrets(17, 16)).toBe(0);
   });
 
+  it('returns positive zero, never negative zero, when the length is out of domain', () => {
+    [3, 4, 5, 6].forEach(length => {
+      expect(Object.is(countPossibleSecrets(length, 'bin'), 0)).toBe(true);
+    });
+  });
+
   it('uses the same digit count for a base name and its numeric size', () => {
     expect(countPossibleSecrets(4, 'dec')).toBe(countPossibleSecrets(4, 10));
     expect(countPossibleSecrets(3, 'hex')).toBe(countPossibleSecrets(3, 16));
