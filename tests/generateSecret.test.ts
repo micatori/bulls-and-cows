@@ -97,8 +97,18 @@ describe('generateSecret', () => {
 
   it('rejects a length that exceeds the number of digits in the base', () => {
     expect(() => generateSecret(3, 'bin', () => 0)).toThrow(RangeError);
-    expect(() => generateSecret(5, 'oct', () => 0)).toThrow(RangeError);
-    expect(() => generateSecret(7, 'dec', () => 0)).toThrow(RangeError);
+    expect(() => generateSecret(4, 'bin', () => 0)).toThrow(RangeError);
+    expect(() => generateSecret(9, 'oct', () => 0)).toThrow(RangeError);
+    expect(() => generateSecret(11, 'dec', () => 0)).toThrow(RangeError);
+    expect(() => generateSecret(17, 'hex', () => 0)).toThrow(RangeError);
+  });
+
+  it('accepts a length equal to the number of digits in the base', () => {
+    const alwaysZero = () => 0;
+
+    expect(generateSecret(2, 'bin', alwaysZero)).toBe('01');
+    expect(generateSecret(8, 'oct', alwaysZero)).toBe('01234567');
+    expect(generateSecret(16, 'hex', alwaysZero)).toBe('0123456789abcdef');
   });
 
   it('rejects a source that breaks the [0, 1) contract', () => {
