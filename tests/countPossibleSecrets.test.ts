@@ -7,11 +7,17 @@ const DIGIT_COUNTS = { bin: 2, oct: 8, dec: 10, hex: 16 } as const;
 const BASES = Object.keys(DIGIT_COUNTS) as (keyof typeof DIGIT_COUNTS)[];
 const LENGTHS = [2, 3, 4, 5, 6] as const;
 
-const permutations = (length: number, digitCount: number): number =>
-  Array.from({ length }, (_, index) => digitCount - index).reduce(
+/** P(n, k) = n·(n−1)·…·(n−k+1); вне области (k > n) перестановок не существует. */
+const permutations = (length: number, digitCount: number): number => {
+  if (length > digitCount) {
+    return 0;
+  }
+
+  return Array.from({ length }, (_, index) => digitCount - index).reduce(
     (total, factor) => total * factor,
     1,
   );
+};
 
 describe('countPossibleSecrets against the closed form', () => {
   const cases: readonly [number, number, number][] = [
