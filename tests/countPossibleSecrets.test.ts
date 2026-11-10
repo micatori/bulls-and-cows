@@ -113,15 +113,25 @@ describe('countPossibleSecrets recurrence', () => {
 });
 
 describe('countPossibleSecrets memoization', () => {
-  it('keeps one shared memoized instance across calls', () => {
-    const beforeFirst = countPossibleSecrets.cacheSize();
-
-    countPossibleSecrets(6, 'hex');
+  it('does not add cache entries when the same call is repeated', () => {
+    countPossibleSecrets(4, 'hex');
     const afterFirst = countPossibleSecrets.cacheSize();
 
-    countPossibleSecrets(6, 'hex');
+    countPossibleSecrets(4, 'hex');
+    countPossibleSecrets(4, 'hex');
+
     expect(countPossibleSecrets.cacheSize()).toBe(afterFirst);
-    expect(afterFirst).toBeGreaterThan(beforeFirst);
+  });
+
+  it('adds at most length + 1 entries for a fresh call, proving sub-results are reused', () => {
+    const before = countPossibleSecrets.cacheSize();
+
+    countPossibleSecrets(7, 15);
+
+    const added = countPossibleSecrets.cacheSize() - before;
+
+    expect(added).toBeGreaterThan(0);
+    expect(added).toBeLessThanOrEqual(8);
   });
 
   it('caches a normalized key so a base name and a number share one entry', () => {
@@ -129,6 +139,7 @@ describe('countPossibleSecrets memoization', () => {
     const afterName = countPossibleSecrets.cacheSize();
 
     countPossibleSecrets(4, 10);
+
     expect(countPossibleSecrets.cacheSize()).toBe(afterName);
   });
 
