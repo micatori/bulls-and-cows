@@ -8,6 +8,10 @@ export interface ElementOptions {
   readonly className?: string;
 }
 
+export const setChecked = (node: HTMLInputElement, checked: boolean): void => {
+  node.checked = checked;
+};
+
 export const el = <K extends Tag>(
   tag: K,
   options: ElementOptions = {},
