@@ -1,7 +1,7 @@
-import { countPossibleSecrets } from './countPossibleSecrets';
-import { evaluateGuess } from './evaluateGuess';
-import { generateSecret } from './generateSecret';
-import { isValidGuess } from './isValidGuess';
+import { countPossibleSecrets } from './countPossibleSecrets.ts';
+import { evaluateGuess } from './evaluateGuess.ts';
+import { generateSecret } from './generateSecret.ts';
+import { isValidGuess } from './isValidGuess.ts';
 import type {
   Attempt,
   ConfiguringState,
@@ -12,7 +12,7 @@ import type {
   Score,
   ScoreRecord,
   WonState,
-} from './types';
+} from './types.ts';
 
 export type SubmitRejection = 'not-running' | 'invalid-guess' | 'already-tried';
 

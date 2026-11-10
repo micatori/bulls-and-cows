@@ -1,5 +1,5 @@
-import { alphabetOf, type Base } from './alphabet';
-import type { RandomSource } from './types';
+import { alphabetOf, type Base } from './alphabet.ts';
+import type { RandomSource } from './types.ts';
 
 interface Picked<T> {
   readonly value: T;

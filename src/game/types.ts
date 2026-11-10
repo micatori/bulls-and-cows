@@ -1,4 +1,4 @@
-import type { Base } from './alphabet';
+import type { Base } from './alphabet.ts';
 
 export type { Base };
 

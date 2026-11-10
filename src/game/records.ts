@@ -1,5 +1,5 @@
-import { DIGITS_BY_BASE } from './alphabet';
-import type { Base, ScoreRecord } from './types';
+import { DIGITS_BY_BASE } from './alphabet.ts';
+import type { Base, ScoreRecord } from './types.ts';
 
 export const MAX_RECORDS = 10;
 

@@ -1,4 +1,4 @@
-import type { Score } from './types';
+import type { Score } from './types.ts';
 
 const toDigits = (value: string): readonly string[] =>
   value.toLowerCase().split('');

@@ -1,5 +1,5 @@
-import { DIGITS_BY_BASE, type Base } from './alphabet';
-import { memoize } from './memoize';
+import { DIGITS_BY_BASE, type Base } from './alphabet.ts';
+import { memoize } from './memoize.ts';
 
 type DigitCount = number;
 type BaseOrCount = Base | DigitCount;

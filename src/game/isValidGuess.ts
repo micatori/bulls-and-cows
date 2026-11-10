@@ -1,5 +1,5 @@
-import { type Base } from './alphabet';
-import { createDigitValidator } from './createDigitValidator';
+import { type Base } from './alphabet.ts';
+import { createDigitValidator } from './createDigitValidator.ts';
 
 const hasValidLength = (guess: string, length: number): boolean =>
   guess.length === length;
