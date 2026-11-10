@@ -5,6 +5,9 @@
     "moduleResolution": "Bundler",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
 
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+
     "rootDir": "./src",
     "outDir": "./dist",
 

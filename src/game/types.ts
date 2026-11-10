@@ -1,5 +1,7 @@
 import type { Base } from './alphabet';
 
+export type { Base };
+
 export type RandomSource = () => number;
 export type GameStatus = 'configuring' | 'running' | 'won';
 
