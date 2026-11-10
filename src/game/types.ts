@@ -33,3 +33,8 @@ export interface ScoreRecord {
   readonly elapsedMs: number;
   readonly finishedAt: number;
 }
+
+export interface Score {
+  readonly bulls: number;
+  readonly cows: number;
+}
