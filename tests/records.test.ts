@@ -74,16 +74,33 @@ describe('compareRecords', () => {
     expect(compareRecords(r1, record(5, 40000, 1000))).toBe(0);
   });
 
+  const signOf = (value: number): number =>
+    Object.is(value, 0) ? 0 : Math.sign(value);
+
   it('is antisymmetric over a table of pairs', () => {
     const records = [r1, r2, r3, r4];
 
     records.forEach(left => {
       records.forEach(right => {
-        expect(Math.sign(compareRecords(left, right))).toBe(
-          -Math.sign(compareRecords(right, left)),
-        );
+        // sum form instead of `x === -y`: -0 and +0 would break the Object.is compare
+        expect(
+          signOf(compareRecords(left, right)) +
+            signOf(compareRecords(right, left)),
+        ).toBe(0);
       });
     });
+  });
+
+  it('is reflexive: every record compares as equal to an identical one', () => {
+    const records = [r1, r2, r3, r4];
+
+    records.forEach(item => {
+      expect(compareRecords(item, structuredClone(item))).toBe(0);
+    });
+  });
+
+  it('returns positive zero for a tie, never negative zero', () => {
+    expect(Object.is(compareRecords(r1, record(5, 40000, 1000)), 0)).toBe(true);
   });
 
   it('sorts a mixed list into the expected order', () => {
@@ -109,7 +126,7 @@ describe('insertRecord', () => {
 
     expect(result).not.toBe(records);
     expect(result).toHaveLength(3);
-    expect(result.map(item => item.finishedAt)).toEqual([2000, 3000, 1000]);
+    expect(result.map(item => item.finishedAt)).toEqual([3000, 2000, 1000]);
   });
 
   it('leaves the input array untouched', () => {
@@ -137,8 +154,9 @@ describe('insertRecord', () => {
   it('reuses element references instead of cloning records', () => {
     const result = insertRecord([r3], r2);
 
-    expect(result[0]).toBe(r2);
-    expect(result[1]).toBe(r3);
+    // r3 wins the attempt tie by elapsed time, but both entries stay the very same objects
+    expect(result[0]).toBe(r3);
+    expect(result[1]).toBe(r2);
   });
 });
 
@@ -181,14 +199,21 @@ describe('takeTop', () => {
 });
 
 describe('registerRecord', () => {
-  it('inserts a record and trims the list back to the scoreboard size', () => {
-    const result = registerRecord(ladder(), record(3, 1500, 999999));
+  it('inserts a record, orders it by the tie-break and evicts the weakest one', () => {
+    const inserted = record(3, 1500, 999999);
+    const result = registerRecord(ladder(), inserted);
 
     expect(result).toHaveLength(MAX_RECORDS);
-    expect(result[0]).toEqual(record(3, 1500, 999999));
+    expect(result[0]).toEqual(record(1, 1000, 10000));
     expect(result.map(item => item.attempts)).toEqual([
-      1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+      1, 2, 3, 3, 4, 5, 6, 7, 8, 9,
     ]);
+
+    // among the two 3-attempt records the faster one (1500ms) comes first
+    expect(result[2]).toBe(inserted);
+
+    // the 10-attempt record was pushed out of the scoreboard
+    expect(result.some(item => item.attempts === 10)).toBe(false);
   });
 
   it('drops a record that is worse than every stored one', () => {
@@ -198,6 +223,7 @@ describe('registerRecord', () => {
     expect(result.map(item => item.attempts)).toEqual([
       1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
     ]);
+    expect(result.some(item => item.attempts === 99)).toBe(false);
   });
 
   it('evicts the weakest record when a better one arrives', () => {
