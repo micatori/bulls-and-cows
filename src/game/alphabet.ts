@@ -1,6 +1,8 @@
 // src/game/alphabet.ts
 export type Base = 'bin' | 'oct' | 'dec' | 'hex';
 
+export const BASES: readonly Base[] = ['bin', 'oct', 'dec', 'hex'];
+
 export const DIGITS_BY_BASE: Record<Base, string> = {
   bin: '01',
   oct: '01234567',

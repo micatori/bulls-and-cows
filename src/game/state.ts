@@ -76,8 +76,10 @@ const createAttempt = (guess: string, score: Score, at: number): Attempt => ({
   at,
 });
 
-const hasTried = (attempts: readonly Attempt[], guess: string): boolean =>
-  attempts.some(attempt => attempt.guess === normalizeGuess(guess));
+export const hasTried = (
+  attempts: readonly Attempt[],
+  guess: string,
+): boolean => attempts.some(attempt => attempt.guess === normalizeGuess(guess));
 
 const rejected = (state: GameState, reason: SubmitRejection): SubmitResult => ({
   status: 'rejected',
