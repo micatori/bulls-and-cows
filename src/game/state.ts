@@ -1,18 +1,18 @@
+import { countPossibleSecrets } from './countPossibleSecrets';
+import { evaluateGuess } from './evaluateGuess';
+import { generateSecret } from './generateSecret';
+import { isValidGuess } from './isValidGuess';
 import type {
   Attempt,
   ConfiguringState,
   GameConfig,
   GameState,
+  RandomSource,
   RunningState,
   Score,
   ScoreRecord,
   WonState,
-  RandomSource,
 } from './types';
-
-const notImplemented = (name: string): never => {
-  throw new Error(`${name} is not implemented yet`);
-};
 
 export type SubmitRejection = 'not-running' | 'invalid-guess' | 'already-tried';
 
@@ -26,53 +26,130 @@ export type SubmitResult =
 
 export const DEFAULT_CONFIG: GameConfig = { length: 4, base: 'dec' };
 
+const EMPTY_ATTEMPTS: readonly Attempt[] = [];
+
+const normalizeGuess = (guess: string): string => guess.toLowerCase();
+
 export const createInitialState = (
-  _draft: GameConfig = DEFAULT_CONFIG,
-): ConfiguringState => notImplemented('createInitialState');
+  draft: GameConfig = DEFAULT_CONFIG,
+): ConfiguringState => ({ status: 'configuring', draft });
 
 export const setDraftConfig = (
-  _state: GameState,
-  _config: GameConfig,
-): GameState => notImplemented('setDraftConfig');
+  state: GameState,
+  config: GameConfig,
+): GameState =>
+  state.status === 'configuring' ? { ...state, draft: config } : state;
 
-export const availableSecrets = (_config: GameConfig): number =>
-  notImplemented('availableSecrets');
+export const availableSecrets = (config: GameConfig): number =>
+  countPossibleSecrets(config.length, config.base);
 
-export const canStart = (_config: GameConfig): boolean =>
-  notImplemented('canStart');
+export const canStart = (config: GameConfig): boolean =>
+  availableSecrets(config) > 0;
 
 export const startRound = (
-  _config: GameConfig,
-  _now: number,
-  _random: RandomSource = Math.random,
-): RunningState => notImplemented('startRound');
+  config: GameConfig,
+  now: number,
+  random: RandomSource = Math.random,
+): RunningState => {
+  if (!canStart(config)) {
+    throw new RangeError(
+      `no secrets exist for length ${config.length} in base ${config.base}`,
+    );
+  }
 
-export const isWin = (_score: Score, _length: number): boolean =>
-  notImplemented('isWin');
+  return {
+    status: 'running',
+    config,
+    secret: generateSecret(config.length, config.base, random),
+    startedAt: now,
+    attempts: [],
+  };
+};
+
+export const isWin = (score: Score, length: number): boolean =>
+  score.bulls === length;
+
+const createAttempt = (guess: string, score: Score, at: number): Attempt => ({
+  guess: normalizeGuess(guess),
+  bulls: score.bulls,
+  cows: score.cows,
+  at,
+});
+
+const hasTried = (attempts: readonly Attempt[], guess: string): boolean =>
+  attempts.some(attempt => attempt.guess === normalizeGuess(guess));
+
+const rejected = (state: GameState, reason: SubmitRejection): SubmitResult => ({
+  status: 'rejected',
+  reason,
+  state,
+});
 
 export const submitAttempt = (
-  _state: GameState,
-  _guess: string,
-  _now: number,
-): SubmitResult => notImplemented('submitAttempt');
+  state: GameState,
+  guess: string,
+  now: number,
+): SubmitResult => {
+  if (state.status !== 'running') {
+    return rejected(state, 'not-running');
+  }
 
-export const finishRound = (_state: RunningState, _now: number): WonState =>
-  notImplemented('finishRound');
+  if (!isValidGuess(guess, state.config.length, state.config.base)) {
+    return rejected(state, 'invalid-guess');
+  }
 
-export const elapsedMs = (_from: number, _to: number): number =>
-  notImplemented('elapsedMs');
+  if (hasTried(state.attempts, guess)) {
+    return rejected(state, 'already-tried');
+  }
 
-export const roundDuration = (_state: WonState): number =>
-  notImplemented('roundDuration');
+  const score = evaluateGuess(state.secret, guess);
+  const attempts: readonly Attempt[] = [
+    ...state.attempts,
+    createAttempt(guess, score, now),
+  ];
 
-export const toRecord = (_state: WonState): ScoreRecord =>
-  notImplemented('toRecord');
+  if (!isWin(score, state.config.length)) {
+    return { status: 'accepted', state: { ...state, attempts } };
+  }
 
-export const backToSettings = (_state: GameState): ConfiguringState =>
-  notImplemented('backToSettings');
+  return {
+    status: 'accepted',
+    state: finishRound({ ...state, attempts }, now),
+  };
+};
 
-export const configOf = (_state: GameState): GameConfig =>
-  notImplemented('configOf');
+export const finishRound = (state: RunningState, now: number): WonState => ({
+  ...state,
+  status: 'won',
+  finishedAt: now,
+});
 
-export const attemptsOf = (_state: GameState): readonly Attempt[] =>
-  notImplemented('attemptsOf');
+export const elapsedMs = (from: number, to: number): number => {
+  if (to < from) {
+    throw new RangeError(
+      `elapsed time cannot be negative, got ${from} -> ${to}`,
+    );
+  }
+
+  return to - from;
+};
+
+export const roundDuration = (state: WonState): number =>
+  elapsedMs(state.startedAt, state.finishedAt);
+
+export const toRecord = (state: WonState): ScoreRecord => ({
+  length: state.config.length,
+  base: state.config.base,
+  attempts: state.attempts.length,
+  elapsedMs: roundDuration(state),
+  finishedAt: state.finishedAt,
+});
+
+export const backToSettings = (state: GameState): ConfiguringState =>
+  state.status === 'configuring' ? state : createInitialState(state.config);
+
+export const configOf = (state: GameState): GameConfig =>
+  state.status === 'configuring' ? state.draft : state.config;
+
+export const attemptsOf = (state: GameState): readonly Attempt[] =>
+  state.status === 'configuring' ? EMPTY_ATTEMPTS : state.attempts;
