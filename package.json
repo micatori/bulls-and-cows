@@ -1,0 +1,52 @@
+{
+  "name": "bulls-and-cows",
+  "version": "1.0.0",
+  "description": "Realization of the game of guessing a secret number from unique digits",
+  "type": "module",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "start": "npm run build && http-server . -c-1 -p 3000",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit -p tsconfig.test.json",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,mts}": [
+      "eslint --max-warnings 0",
+      "prettier --write"
+    ],
+    "*.{json,md,html,css}": [
+      "prettier --write"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/micatori/bulls-and-cows.git"
+  },
+  "keywords": [],
+  "author": "micatori",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/micatori/bulls-and-cows/issues"
+  },
+  "homepage": "https://github.com/micatori/bulls-and-cows#readme",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.6",
+    "eslint": "^10.14.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.14.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.2",
+    "vitest": "^5.1.0"
+  }
+}
