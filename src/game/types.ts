@@ -1,30 +1,48 @@
-// src/game/types.ts
 import type { Base } from './alphabet';
 
 export type RandomSource = () => number;
-
-export type GameStatus = 'idle' | 'running' | 'won';
+export type GameStatus = 'configuring' | 'running' | 'won';
 
 export interface GameConfig {
   readonly length: number;
   readonly base: Base;
 }
 
+export interface Score {
+  readonly bulls: number;
+  readonly cows: number;
+}
+
 export interface Attempt {
   readonly guess: string;
   readonly bulls: number;
   readonly cows: number;
-  readonly at: number; // метка времени попытки
+  readonly at: number;
 }
 
-export interface GameState {
-  readonly status: GameStatus;
-  readonly config: GameConfig | null;
-  readonly secret: string | null;
-  readonly attempts: readonly Attempt[];
-  readonly startedAt: number | null;
-  readonly finishedAt: number | null;
+export interface ConfiguringState {
+  readonly status: 'configuring';
+  readonly draft: GameConfig;
 }
+
+export interface RunningState {
+  readonly status: 'running';
+  readonly config: GameConfig;
+  readonly secret: string;
+  readonly startedAt: number;
+  readonly attempts: readonly Attempt[];
+}
+
+export interface WonState {
+  readonly status: 'won';
+  readonly config: GameConfig;
+  readonly secret: string;
+  readonly startedAt: number;
+  readonly finishedAt: number;
+  readonly attempts: readonly Attempt[];
+}
+
+export type GameState = ConfiguringState | RunningState | WonState;
 
 export interface ScoreRecord {
   readonly length: number;
@@ -32,9 +50,4 @@ export interface ScoreRecord {
   readonly attempts: number;
   readonly elapsedMs: number;
   readonly finishedAt: number;
-}
-
-export interface Score {
-  readonly bulls: number;
-  readonly cows: number;
 }
