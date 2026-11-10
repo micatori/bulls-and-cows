@@ -1,5 +1,6 @@
-export const createDigitValidator = (base: number) => {
-  void base;
+import { alphabetOf, type Base } from './alphabet';
 
-  return () => false;
-};
+export const createDigitValidator =
+  (base: Base) =>
+  (char: string): boolean =>
+    char.length === 1 && alphabetOf(base).includes(char.toLowerCase());
